@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: laser-backend
+    
+    # Restart policy - always restart on failure
+    restart: unless-stopped
+    
+    # Environment variables
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      # Configure Flask server URL
+      - FLASK_SERVER_URL=http://192.168.1.108:8080
+      - CAMERA_URL=http://192.168.1.108:5000
+      - FRONTEND_URL=http://localhost
+    
+    ports:
+      - "3000:3000"
+    
+    # Networks
+    networks:
+      - laser-network
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ==========================================
+  # FRONTEND SERVICE (React + Nginx)
+  # ==========================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: laser-frontend
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Port mapping - expose on host port 80
+    ports:
+      - "5173:5173"
+    
+    # Depends on backend service
+    depends_on:
+      backend:
+        condition: service_healthy
+    
+    # Networks
+    networks:
+      - laser-network
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5173"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+#==========================================
+# NETWORKS
+#==========================================
+networks:
+  laser-network:
+    driver: bridge
