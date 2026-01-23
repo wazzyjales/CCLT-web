@@ -7,20 +7,72 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Flask server configuration
-const FLASK_SERVER_URL = process.env.FLASK_SERVER_URL;
-const CAMERA_URL = process.env.CAMERA_URL;
-console.log(CAMERA_URL)
+let FLASK_SERVER_URL = null;
+let CAMERA_URL = null;
 
-///////////////////////////////////////////////////////////////
-// CONFIGURE MIDDLEWARE
-///////////////////////////////////////////////////////////////
-// Enable CORS for cross-origin requests from frontend
+const FLASK_URLS = {
+  primary: process.env.FLASK_SERVER_URL,
+  remote: process.env.REMOTE_FLASK_SERVER_URL
+};
+const CAMERA_URLS = {
+  primary: process.env.CAMERA_URL,
+  remote: process.env.REMOTE_CAMERA_URL
+}
+
+async function checkServerHealth(url) {
+  try {
+    const response = await axios.get(`${url}/health`, { 
+      timeout: 5000,
+    });
+    return { available: true, url, response: response.data };
+  } 
+  catch (error) {
+    return { available: false, url, error: error.message };
+  }
+}
+
+async function selectWorkingUrl(urlConfig, serverName) {
+  
+  // Try primary first
+  console.log(`Trying primary: ${urlConfig.primary}`);
+  const primaryCheck = await checkServerHealth(urlConfig.primary);
+  if (primaryCheck.available) {
+    console.log(`Primary ${serverName} server is available`);
+    return urlConfig.primary;
+  }
+  console.log(`Primary ${serverName} server unavailable: ${primaryCheck.error}`);
+  
+  // Try remote as fallback
+  console.log(`Trying remote: ${urlConfig.remote}`);
+  const remoteCheck = await checkServerHealth(urlConfig.remote);
+  if (remoteCheck.available) {
+    console.log(`Remote ${serverName} server is available`);
+    return urlConfig.remote;
+  }
+
+  // Default return, errors jandeled per-request
+  return urlConfig.primary;
+}
+
+/**
+ * Initialize server URLs on startup
+ */
+async function initializeServerUrls() {
+  FLASK_SERVER_URL = await selectWorkingUrl(FLASK_URLS, 'Flask');
+  CAMERA_URL = await selectWorkingUrl(CAMERA_URLS, 'Camera');
+}
+
+/*****************************************************************
+ * CONFIGURE MIDDLEWARE 
+ *****************************************************************/
 app.use(cors({
   origin: [ process.env.FRONTEND_URL || 'http://localhost:5173',
-  'http://191.168.1.108:*', //raspberry pi 
+  'http://192.168.1.108:*', //raspberry pi 
+  'http://100.81.246.79:*', //raspberry pi remote 
   ], 
   credentials: true,
 }));
+
 app.use(express.json());
 
 // Request logging middleware
@@ -29,20 +81,34 @@ app.use((req, res, next) => {
   next();
 });
 
-///////////////////////////////////////////////////////////////
-// POST ENDPOINTS
-///////////////////////////////////////////////////////////////
+/*****************************************************************
+ * POST ENDPOINTS 
+ *****************************************************************/
 app.post('/api/detection', (req, res) => {
     console.log('Received data:', req.body);
     res.json({ status: 'success', received: req.body });
 });
 
-///////////////////////////////////////////////////////////////
-// GET ENDPOINTS
-///////////////////////////////////////////////////////////////
-/**
- Returns server status and Flask connectivity
- */
+/*****************************************************************
+ * GET ENDPOINTS 
+ *****************************************************************/
+app.get('/api/camera/health', async (req, res) => {
+  try {
+    const flaskResponse = await axios.get(`${CAMERA_URL}/health`, {
+      timeout: 5000
+    });
+    
+    res.json({
+      status: 'success',
+      data: flaskResponse.data,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Video stream error:', error.message);
+    handleFlaskError(error, res, 'Failed to get camera status');
+  }
+});
+
 app.get('/api/health', async (req, res) => {
   try {
     console.log(FLASK_SERVER_URL)
@@ -58,18 +124,13 @@ app.get('/api/health', async (req, res) => {
       flaskDetails: {
         gpio_initialized: flaskResponse.data.gpio_initialized,
         current_pan: flaskResponse.data.details?.current_pan,
-        current_tilt: flaskResponse.data.details?.current_tilt
+        current_tilt: flaskResponse.data.details?.current_tilt,
+        data: flaskResponse.data,
       }
     });
   } catch (error) {
-    console.error('Health check error:', error.message);
-    res.status(503).json({
-      status: 'degraded',
-      backend: 'operational',
-      flaskServer: 'unreachable',
-      error: error.message,
-      note: `Cannot connect to Flask server at ${FLASK_SERVER_URL}`
-    });
+    console.error('Laser control error:', error.message);
+    handleFlaskError(error, res, 'Failed to get laser status');
   }
 });
 
@@ -126,7 +187,6 @@ app.get('/api/laser/move-y', async (req, res) => {
     }
     
     console.log(`Moving laser ${direction}...`);
-    
     const flaskResponse = await axios.get(
       `${FLASK_SERVER_URL}/move-y`,
       {
@@ -233,37 +293,17 @@ app.get('/api/laser/on', async (req, res) => {
   }
 });
 
-/**
- */
-app.get('/api/camera/health', async (req, res) => {
-  try {
-    const flaskResponse = await axios.get(`${CAMERA_URL}/health`, {
-      timeout: 5000
-    });
-    
-    res.json({
-      status: 'success',
-      data: flaskResponse.data,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    console.error('Video stream error:', error.message);
-    handleFlaskError(error, res, 'Failed to get camera status');
-  }
-});
 
-///////////////////////////////////////////////////////////////
-// ERROR HANDELING
-///////////////////////////////////////////////////////////////
-/**
- * Consistent error handling for Flask communication failures
- */
+/*****************************************************************
+ * ERROR HANDELING 
+ *****************************************************************/
 function handleFlaskError(error, res, defaultMessage) {
-  if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+  // Flask server couldnt be reached
+  if (error.code === 'ETIMEDOUT' || error.code === 'ECONNREFUSED') {
     return res.status(503).json({
       status: 'error',
       error: 'Flask server is not reachable',
-      details: `Cannot connect to ${FLASK_SERVER_URL}`,
+      details: 'Cannot connect to Flask  server',
       message: defaultMessage,
     });
   }
@@ -279,7 +319,7 @@ function handleFlaskError(error, res, defaultMessage) {
   }
   
   // Generic error
-  res.status(500).json({
+  return res.status(500).json({
     status: 'error',
     error: 'Internal server error',
     details: error.message,
@@ -310,21 +350,28 @@ app.use((req, res) => {
   });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log('='.repeat(50));
-  console.log(`Port: ${PORT}`);
-  console.log(`Flask Server: ${FLASK_SERVER_URL}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log('='.repeat(50));
-});
+/*****************************************************************
+ * ERROR HANDELING 
+ *****************************************************************/
+async function startServer() {
+  try {
+    // Initialize server URLs before starting Express
+    await initializeServerUrls();
+    
+    // Start Express server
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log('='.repeat(60));
+      console.log(`Port: ${PORT}`);
+      console.log(`Flask Server: ${FLASK_SERVER_URL}`);
+      console.log(`Camera Server: ${CAMERA_URL}`);
+      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log('='.repeat(60) + '\n');
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully...');
-  process.exit(0);
-});
-
-process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully...');
-  process.exit(0);
-});
+// Start the server
+startServer();
