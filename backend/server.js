@@ -11,13 +11,17 @@ const FLASK_SERVER_URL = process.env.FLASK_SERVER_URL;
 const CAMERA_URL = process.env.CAMERA_URL;
 console.log(CAMERA_URL)
 
+///////////////////////////////////////////////////////////////
+// CONFIGURE MIDDLEWARE
+///////////////////////////////////////////////////////////////
 // Enable CORS for cross-origin requests from frontend
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: [ process.env.FRONTEND_URL || 'http://localhost:5173',
+  'http://191.168.1.108:*', //raspberry pi 
+  ], 
   credentials: true,
 }));
 app.use(express.json());
-//app.use(express.urlencoded({ extended: true }));
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -25,6 +29,17 @@ app.use((req, res, next) => {
   next();
 });
 
+///////////////////////////////////////////////////////////////
+// POST ENDPOINTS
+///////////////////////////////////////////////////////////////
+app.post('/api/detection', (req, res) => {
+    console.log('Received data:', req.body);
+    res.json({ status: 'success', received: req.body });
+});
+
+///////////////////////////////////////////////////////////////
+// GET ENDPOINTS
+///////////////////////////////////////////////////////////////
 /**
  Returns server status and Flask connectivity
  */
@@ -155,7 +170,6 @@ app.get('/api/laser/center', async (req, res) => {
   }
 });
 
-
 /**
  * Gets current laser status from Flask server
  */
@@ -238,6 +252,9 @@ app.get('/api/camera/health', async (req, res) => {
   }
 });
 
+///////////////////////////////////////////////////////////////
+// ERROR HANDELING
+///////////////////////////////////////////////////////////////
 /**
  * Consistent error handling for Flask communication failures
  */
