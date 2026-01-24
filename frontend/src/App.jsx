@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import './App.css'
+import DirectionButton from './Components/DirectionButton'
 
 function App() {
   const [backendStatus, setBackendStatus] = useState('checking...')
@@ -7,8 +8,7 @@ function App() {
   const [laserOn, setLaserOn] = useState(false)
   const [isMoving, setIsMoving] = useState(false)
   const [pressedKey, setPressedKey] = useState(null)
-
-  const CAMERA_URL = 'http://192.168.1.108:5000/video_feed';
+  const [cameraURL, setCameraURL] = useState(null)
 
   useEffect(() => {
     checkBackendHealth()
@@ -78,6 +78,9 @@ function App() {
         setBackendStatus('Backend error')
         setIsConnected(false)
       }
+      setCameraURL(camera_data.video_url)
+
+      console.log(cameraURL)
     } catch (error) {
       // Backend not reachable
       setBackendStatus('Disconnected')
@@ -113,6 +116,18 @@ function App() {
     }
   }
 
+  // Help function to map directions
+  const isDirectionPressed = (dir) => {
+    const keyMap = {
+      'up': 'ArrowUp',
+      'down': 'ArrowDown',
+      'right': 'ArrowRight',
+      'left': 'ArrowLeft'
+    }
+
+    return pressedKey === keyMap[dir]
+  }
+
   return (
     <div className="app-container">
       {/* Top controls bar */}
@@ -129,50 +144,6 @@ function App() {
           <div className={`status-dot ${isConnected ? 'connected' : 'disconnected'}`}></div>
           <span className="status-text">{backendStatus}</span>
         </div>
-
-        <button className="settings-button">
-          ⚙ Settings
-        </button>
-      </div>
-
-      {/* Video section with overlayed controls */}
-      <div className="video-container">
-        <img
-          src={CAMERA_URL}
-          alt="Live Camera Stream"
-          className="camera-feed"
-        />
-        
-        {/* Overlayed direction controls */}
-        <div className="overlay-controls">
-          <button 
-            className={`overlay-button ${pressedKey === 'ArrowUp' ? 'pressed' : ''}`}
-            onClick={() => moveWithDebounce('up', 'y')}>
-            ↑
-          </button>
-          
-          <div className="horizontal-overlay">
-            <button 
-              className={`overlay-button ${pressedKey === 'ArrowLeft' ? 'pressed' : ''}`}
-              onClick={() => moveWithDebounce('left', 'x')}>
-              ←
-            </button>
-            <button 
-              className={`overlay-button ${pressedKey === 'ArrowRight' ? 'pressed' : ''}`}
-              onClick={() => moveWithDebounce('right', 'x')}>
-              →
-            </button>
-          </div>
-
-          <button 
-            className={`overlay-button ${pressedKey === 'ArrowDown' ? 'pressed' : ''}`}
-            onClick={() => moveWithDebounce('down', 'y')}>
-            ↓
-          </button>
-        </div>
-
-        {/* Overlayed laser button */}
-        <div className="laser-overlay">
           <button 
             className="laser-button"
             onClick={toggleLaser}
@@ -182,6 +153,46 @@ function App() {
           >
             Laser: {laserOn ? 'ON' : 'OFF'}
           </button>
+
+        <button className="settings-button">
+          Settings
+        </button>
+      </div>
+
+      {/* Video section with overlayed controls */}
+      <div className="video-container">
+        <img
+          src={cameraURL}
+          alt="Live Camera Stream"
+          className="camera-feed"
+        />
+        
+       {/* Overlayed direction controls using DirectionButton component */}
+        <div className="overlay-controls">
+          <DirectionButton 
+            direction="up"
+            onClick={() => moveWithDebounce('up', 'y')}
+            isPressed={isDirectionPressed('up')}
+          />
+          
+          <div className="horizontal-overlay">
+            <DirectionButton 
+              direction="left"
+              onClick={() => moveWithDebounce('left', 'x')}
+              isPressed={isDirectionPressed('left')}
+            />
+            <DirectionButton 
+              direction="right"
+              onClick={() => moveWithDebounce('right', 'x')}
+              isPressed={isDirectionPressed('right')}
+            />
+          </div>
+
+          <DirectionButton 
+            direction="down"
+            onClick={() => moveWithDebounce('down', 'y')}
+            isPressed={isDirectionPressed('down')}
+          />
         </div>
       </div>
     </div>

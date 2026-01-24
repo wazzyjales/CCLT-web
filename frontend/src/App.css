@@ -104,41 +104,9 @@ body {
   gap: 60px;
 }
 
-.overlay-button {
-  width: 60px;
-  height: 60px;
-  background: rgba(200, 200, 200, 0.6);
-  border: 2px solid rgba(100, 100, 100, 0.6);
-  color: #666;
-  font-size: 2rem;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(3px);
-}
-
-.overlay-button:hover {
-  background: rgba(180, 180, 180, 0.7);
-  transform: scale(1.05);
-}
-
-.overlay-button:active,
-.overlay-button.pressed {
-  background: rgba(76, 175, 80, 0.7);
-  border-color: #4CAF50;
-  color: #fff;
-  transform: scale(0.95);
-}
-
 /* ============================================
-   LASER BUTTON (OVERLAYED)
+   LASER BUTTON 
    ============================================ */
-
-.laser-overlay {
-  position: absolute;
-  top: 15%;
-  right: 16%;
-}
 
 .laser-button {
   padding: 12px 24px;
