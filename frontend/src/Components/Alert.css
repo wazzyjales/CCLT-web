@@ -1,0 +1,59 @@
+/* ALERT OVERLAY */
+.alert-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 245, 248, 0.3);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opactity 0.3s ease-in-out;
+}
+
+.alert-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.alert-stack {
+  width: auto !important;
+  pointer-events: auto;
+}
+
+.alert-message {
+  background: linear-gradient(135deg, #fff 0%, #fff9fc 100%) !important;
+  border: 3px solid #ffb6c1 !important;
+  border-radius: 20px !important;
+  box-shadow: 0 8px 24px rgba(255, 182, 193, 0.4) !important;
+  padding: 20px 30px !important;
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  color: #d63384 !important;
+  animation: slideDown 0.3s ease-out;
+}
+
+.alert-message .MuiAlert-icon {
+  color: #4CAF50 !important;
+  font-size: 2rem !important;
+}
+
+.alert-message .MuiAlert-message {
+  color: #d63384 !important;
+  font-weight: 600 !important;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

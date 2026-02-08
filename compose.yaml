@@ -17,11 +17,17 @@ services:
       # Configure Flask server URL
       - FLASK_SERVER_URL=http://192.168.1.108:8080
       - CAMERA_URL=http://192.168.1.108:5000
+      - REMOTE_FLASK_SERVER_URL=http://100.81.246.79:8080
+      - REMOTE_CAMERA_URL=http://100.81.246.79:5000
       - FRONTEND_URL=http://localhost
     
     ports:
       - "3000:3000"
-    
+
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - ./backend/data:/app/data
     # Networks
     networks:
       - laser-network

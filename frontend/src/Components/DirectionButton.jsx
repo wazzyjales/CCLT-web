@@ -1,41 +1,47 @@
-import { Box, Fab } from '@mui/material';
+import { Box, Button} from '@mui/material';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 export default function DirectionButton({ direction, onClick, isPressed }) {
-  // Map direction to the appropriate icon
   const getIcon = () => {
     switch(direction) {
-      case 'up':
-        return <ArrowUpwardIcon />;
-      case 'down':
+      case 'ArrowUp':
+        return <ArrowUpwardIcon/>;
+      case 'ArrowDown':
         return <ArrowDownwardIcon />;
-      case 'left':
+      case 'ArrowLeft':
         return <ArrowBackIcon />;
-      case 'right':
+      case 'ArrowRight':
         return <ArrowForwardIcon />;
       default:
         return <ArrowUpwardIcon />;
     }
   };
 
-  return (
+return (
     <Box sx={{ '& > :not(style)': { m: 1 } }}>
-      <Fab 
-        size="large" 
-        color={isPressed ? "primary" : "secondary"}
+      <Button 
+        variant="contained"
         aria-label={direction}
         onClick={onClick}
         sx={{
+          backgroundColor: '#ec407a', // Pink shades
+          '&:hover': {
+            backgroundColor: '#ff92a8',
+          },
           transition: 'all 0.2s ease',
           transform: isPressed ? 'scale(0.95)' : 'scale(1)',
           boxShadow: isPressed ? 1 : 3,
+          width: 90,
+          height: 90,
+          borderRadius: 2,
+          minWidth: 'unset',
         }}
       >
         {getIcon()}
-      </Fab>
+      </Button>
     </Box>
-  );
+);
 }

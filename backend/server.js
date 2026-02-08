@@ -1,65 +1,36 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const path = require('path');
+const fs = require('fs');
+
+// Import helper functions
+const {
+  getFlaskServerUrl,
+  getCameraUrl,
+  handleFlaskError,
+  sendCatDetected,
+  setupSseConnection,
+  startServer
+} = require('./server-helpers');
+
+// Import database functions
+const {
+  getSettings,
+  updateSettings,
+  validateSettings,
+  getConfigurationHistory
+} = require('./database');
 
 // Initialize Express application
 const app = express();
 const PORT = process.env.PORT || 3000;
+const sseClients = new Set()
 
-// Flask server configuration
-let FLASK_SERVER_URL = null;
-let CAMERA_URL = null;
-
-const FLASK_URLS = {
-  primary: process.env.FLASK_SERVER_URL,
-  remote: process.env.REMOTE_FLASK_SERVER_URL
-};
-const CAMERA_URLS = {
-  primary: process.env.CAMERA_URL,
-  remote: process.env.REMOTE_CAMERA_URL
-}
-
-async function checkServerHealth(url) {
-  try {
-    const response = await axios.get(`${url}/health`, { 
-      timeout: 5000,
-    });
-    return { available: true, url, response: response.data };
-  } 
-  catch (error) {
-    return { available: false, url, error: error.message };
-  }
-}
-
-async function selectWorkingUrl(urlConfig, serverName) {
-  
-  // Try primary first
-  console.log(`Trying primary: ${urlConfig.primary}`);
-  const primaryCheck = await checkServerHealth(urlConfig.primary);
-  if (primaryCheck.available) {
-    console.log(`Primary ${serverName} server is available`);
-    return urlConfig.primary;
-  }
-  console.log(`Primary ${serverName} server unavailable: ${primaryCheck.error}`);
-  
-  // Try remote as fallback
-  console.log(`Trying remote: ${urlConfig.remote}`);
-  const remoteCheck = await checkServerHealth(urlConfig.remote);
-  if (remoteCheck.available) {
-    console.log(`Remote ${serverName} server is available`);
-    return urlConfig.remote;
-  }
-
-  // Default return, errors jandeled per-request
-  return urlConfig.primary;
-}
-
-/**
- * Initialize server URLs on startup
- */
-async function initializeServerUrls() {
-  FLASK_SERVER_URL = await selectWorkingUrl(FLASK_URLS, 'Flask');
-  CAMERA_URL = await selectWorkingUrl(CAMERA_URLS, 'Camera');
+// Ensure data directory exists
+const dataDir = path.join(__dirname, 'data');
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
 }
 
 /*****************************************************************
@@ -81,27 +52,239 @@ app.use((req, res, next) => {
   next();
 });
 
+/**
+ * Update settings for the user
+ */
+app.put('/api/settings', (req, res) => {
+  try {
+    const userId = 'jasmi';
+    const settingsData = req.body;
+
+    // Validate settings
+    const validation = validateSettings(settingsData);
+    if (!validation.valid) {
+      return res.status(400).json({
+        status: 'error',
+        error: 'Invalid settings',
+        details: validation.errors
+      });
+    }
+
+    // Update settings
+    const success = updateSettings(userId, settingsData);
+
+    if (!success) {
+      return res.status(500).json({
+        status: 'error',
+        error: 'Failed to update settings'
+      });
+    }
+
+    // Get updated settings to return
+    const updatedSettings = getSettings(userId);
+
+    res.json({
+      status: 'success',
+      data: updatedSettings,
+      message: 'Settings updated successfully',
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Error updating settings:', error);
+    res.status(500).json({
+      status: 'error',
+      error: 'Failed to update settings',
+      details: error.message
+    });
+  }
+});
+
+/*****************************************************************
+ * PATCH ENDPOINTS 
+ *****************************************************************/
+/**
+ * PATCH /api/settings/notifications
+ * Quick toggle for notifications only
+ */
+app.patch('/api/settings/notifications', (req, res) => {
+  try {
+    const userId = 'jasmi';
+    const { enabled } = req.body;
+
+    if (typeof enabled !== 'boolean') {
+      return res.status(400).json({
+        status: 'error',
+        error: 'enabled must be a boolean value'
+      });
+    }
+
+    const currentSettings = getSettings(userId);
+    if (!currentSettings) {
+      return res.status(404).json({
+        status: 'error',
+        error: 'Settings not found'
+      });
+    }
+
+    currentSettings.notificationsEnabled = enabled;
+    const success = updateSettings(userId, currentSettings);
+
+    if (!success) {
+      return res.status(500).json({
+        status: 'error',
+        error: 'Failed to update notification settings'
+      });
+    }
+
+    res.json({
+      status: 'success',
+      data: { notificationsEnabled: enabled },
+      message: `Notifications ${enabled ? 'enabled' : 'disabled'}`,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Error updating notification settings:', error);
+    res.status(500).json({
+      status: 'error',
+      error: 'Failed to update notification settings',
+      details: error.message
+    });
+  }
+});
+
+/**
+ * PATCH /api/settings/autonomous
+ * Quick toggle for autonomous mode only
+ */
+app.patch('/api/settings/autonomous', (req, res) => {
+  try {
+    const userId = 'jasmi';
+    const { enabled } = req.body;
+
+    if (typeof enabled !== 'boolean') {
+      return res.status(400).json({
+        status: 'error',
+        error: 'enabled must be a boolean value'
+      });
+    }
+
+    const currentSettings = getSettings(userId);
+    if (!currentSettings) {
+      return res.status(404).json({
+        status: 'error',
+        error: 'Settings not found'
+      });
+    }
+
+    currentSettings.autonomousModeEnabled = enabled;
+    const success = updateSettings(userId, currentSettings);
+
+    if (!success) {
+      return res.status(500).json({
+        status: 'error',
+        error: 'Failed to update autonomous mode settings'
+      });
+    }
+
+    res.json({
+      status: 'success',
+      data: { autonomousModeEnabled: enabled },
+      message: `Autonomous mode ${enabled ? 'enabled' : 'disabled'}`,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Error updating autonomous mode settings:', error);
+    res.status(500).json({
+      status: 'error',
+      error: 'Failed to update autonomous mode settings',
+      details: error.message
+    });
+  }
+});
+
 /*****************************************************************
  * POST ENDPOINTS 
  *****************************************************************/
+/**
+ * Recieve cat detected alert from camera 
+ */
 app.post('/api/detection', (req, res) => {
     console.log('Received data:', req.body);
     res.json({ status: 'success', received: req.body });
+    sendCatDetected(req.body)
+});
+
+/**
+ * Reset settings to defaults
+ */
+app.post('/api/settings/reset', (req, res) => {
+  try {
+    const userId = 'jasmi';
+    
+    const defaultSettings = {
+      notificationsEnabled: true,
+      autonomousModeEnabled: false,
+      triggerType: 'detection',
+      timeInterval: 2,
+      sessionDuration: 5
+    };
+
+    const success = updateSettings(userId, defaultSettings);
+
+    if (!success) {
+      return res.status(500).json({
+        status: 'error',
+        error: 'Failed to reset settings'
+      });
+    }
+
+    const resetSettings = getSettings(userId);
+
+    res.json({
+      status: 'success',
+      data: resetSettings,
+      message: 'Settings reset to defaults',
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Error resetting settings:', error);
+    res.status(500).json({
+      status: 'error',
+      error: 'Failed to reset settings',
+      details: error.message
+    });
+  }
 });
 
 /*****************************************************************
  * GET ENDPOINTS 
  *****************************************************************/
+/***
+ * SSE connection endpoint.
+ * The frontend connects here and keeps the connection open.
+ * Each connected browser tab is a separate client in the Set.
+ ***/
+app.get('/api/detection/events', (req, res) => {
+  setupSseConnection(req. res. sseClients);
+})
+
 app.get('/api/camera/health', async (req, res) => {
+  let camera_server_url = getCameraUrl();
   try {
-    const flaskResponse = await axios.get(`${CAMERA_URL}/health`, {
+    const flaskResponse = await axios.get(`${camera_server_url}/health`, {
       timeout: 5000
     });
     
     res.json({
       status: 'success',
       data: flaskResponse.data,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      url: camera_server_url,
+      video_url: `${camera_server_url}/video_feed`
     });
   } catch (error) {
     console.error('Video stream error:', error.message);
@@ -110,15 +293,17 @@ app.get('/api/camera/health', async (req, res) => {
 });
 
 app.get('/api/health', async (req, res) => {
+  let flask_server_url = getFlaskServerUrl();
   try {
-    console.log(FLASK_SERVER_URL)
-    const flaskResponse = await axios.get(`${FLASK_SERVER_URL}/health`, {
+    console.log(flask_server_url)
+    const flaskResponse = await axios.get(`${flask_server_url}/health`, {
       timeout: 5000
     });
     
     res.json({
       status: 'success',
       timestamp: new Date().toISOString(),
+      url:  flask_server_url,
       backend: 'operational',
       flaskServer: flaskResponse.data.status || 'healthy',
       flaskDetails: {
@@ -139,6 +324,7 @@ app.get('/api/health', async (req, res) => {
  * GET /api/laser/move-x?direction=left|right
  */
 app.get('/api/laser/move-x', async (req, res) => {
+  let flask_server_url = getFlaskServerUrl();
   try {
     const { direction } = req.query;
     
@@ -152,7 +338,7 @@ app.get('/api/laser/move-x', async (req, res) => {
     console.log(`Moving laser ${direction}...`);
     
     const flaskResponse = await axios.get(
-      `${FLASK_SERVER_URL}/move-x`,
+      `${flask_server_url}/move-x`,
       {
         params: { direction: direction.toLowerCase() },
         timeout: 1000
@@ -176,6 +362,7 @@ app.get('/api/laser/move-x', async (req, res) => {
  * GET /api/laser/move-y?direction=up|down
  */
 app.get('/api/laser/move-y', async (req, res) => {
+  let flask_server_url = getFlaskServerUrl();
   try {
     const { direction } = req.query;
     
@@ -188,7 +375,7 @@ app.get('/api/laser/move-y', async (req, res) => {
     
     console.log(`Moving laser ${direction}...`);
     const flaskResponse = await axios.get(
-      `${FLASK_SERVER_URL}/move-y`,
+      `${flask_server_url}/move-y`,
       {
         params: { direction: direction.toLowerCase() },
         timeout: 1000
@@ -211,10 +398,11 @@ app.get('/api/laser/move-y', async (req, res) => {
  * Centers both servos
  */
 app.get('/api/laser/center', async (req, res) => {
+  let flask_server_url = getFlaskServerUrl();
   try {
     console.log('Centering laser...');
     
-    const flaskResponse = await axios.get(`${FLASK_SERVER_URL}/center`, {
+    const flaskResponse = await axios.get(`${flask_server_url}/center`, {
       timeout: 10000
     });
     
@@ -234,8 +422,9 @@ app.get('/api/laser/center', async (req, res) => {
  * Gets current laser status from Flask server
  */
 app.get('/api/laser/status', async (req, res) => {
+  let flask_server_url = getFlaskServerUrl();
   try {
-    const flaskResponse = await axios.get(`${FLASK_SERVER_URL}/status`, {
+    const flaskResponse = await axios.get(`${flask_server_url}/status`, {
       timeout: 5000
     });
     
@@ -255,8 +444,9 @@ app.get('/api/laser/status', async (req, res) => {
  * Gets current laser status from Flask server
  */
 app.get('/api/laser/off', async (req, res) => {
+  let flask_server_url = getFlaskServerUrl();
   try {
-    const flaskResponse = await axios.get(`${FLASK_SERVER_URL}/off`, {
+    const flaskResponse = await axios.get(`${flask_server_url}/off`, {
       timeout: 5000
     });
     
@@ -276,8 +466,9 @@ app.get('/api/laser/off', async (req, res) => {
  * Gets current laser status from Flask server
  */
 app.get('/api/laser/on', async (req, res) => {
+  let flask_server_url = getFlaskServerUrl();
   try {
-    const flaskResponse = await axios.get(`${FLASK_SERVER_URL}/on`, {
+    const flaskResponse = await axios.get(`${flask_server_url}/on`, {
       timeout: 5000
     });
     
@@ -293,39 +484,62 @@ app.get('/api/laser/on', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/settings/history
+ * Get configuration change history
+ */
+app.get('/api/settings/history', (req, res) => {
+  try {
+    const userId = 'jasmi';
+    const limit = parseInt(req.query.limit) || 10;
+    
+    const history = getConfigurationHistory(userId, limit);
 
-/*****************************************************************
- * ERROR HANDELING 
- *****************************************************************/
-function handleFlaskError(error, res, defaultMessage) {
-  // Flask server couldnt be reached
-  if (error.code === 'ETIMEDOUT' || error.code === 'ECONNREFUSED') {
-    return res.status(503).json({
+    res.json({
+      status: 'success',
+      data: history,
+      count: history.length,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Error fetching settings history:', error);
+    res.status(500).json({
       status: 'error',
-      error: 'Flask server is not reachable',
-      details: 'Cannot connect to Flask  server',
-      message: defaultMessage,
+      error: 'Failed to fetch settings history',
+      details: error.message
     });
   }
-  
-  if (error.response) {
-    // Flask server returned an error
-    return res.status(error.response.status).json({
+});
+
+app.get('/api/settings', (req, res) => {
+// Retrieve current settings for the user
+  try {
+    const userId = 'jasmi';
+    
+    const settings = getSettings(userId);
+    
+    if (!settings) {
+      return res.status(404).json({
+        status: 'error',
+        error: 'Settings not found'
+      });
+    }
+
+    res.json({
+      status: 'success',
+      data: settings,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error fetching settings:', error);
+    res.status(500).json({
       status: 'error',
-      error: 'Flask server error',
-      details: error.response.data,
-      message: defaultMessage
+      error: 'Failed to fetch settings',
+      details: error.message
     });
   }
-  
-  // Generic error
-  return res.status(500).json({
-    status: 'error',
-    error: 'Internal server error',
-    details: error.message,
-    message: defaultMessage
-  });
-}
+});
 
 /**
  * Catches any unhandled errors
@@ -350,28 +564,5 @@ app.use((req, res) => {
   });
 });
 
-/*****************************************************************
- * ERROR HANDELING 
- *****************************************************************/
-async function startServer() {
-  try {
-    // Initialize server URLs before starting Express
-    await initializeServerUrls();
-    
-    // Start Express server
-    app.listen(PORT, '0.0.0.0', () => {
-      console.log('='.repeat(60));
-      console.log(`Port: ${PORT}`);
-      console.log(`Flask Server: ${FLASK_SERVER_URL}`);
-      console.log(`Camera Server: ${CAMERA_URL}`);
-      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log('='.repeat(60) + '\n');
-    });
-  } catch (error) {
-    console.error('Failed to start server:', error);
-    process.exit(1);
-  }
-}
-
 // Start the server
-startServer();
+startServer(app, PORT);
