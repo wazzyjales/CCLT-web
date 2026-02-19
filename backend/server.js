@@ -22,6 +22,14 @@ const {
   getConfigurationHistory
 } = require('./database');
 
+const AutonomousModeManager = require('./auto-mode-manager');
+
+// Create instance
+const autonomousModeManager = new AutonomousModeManager(
+  getSettings,
+  getFlaskServerUrl
+);
+
 // Initialize Express application
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -215,6 +223,7 @@ app.post('/api/detection', (req, res) => {
     console.log('Received data:', req.body);
     res.json({ status: 'success', received: req.body });
     sendCatDetected(sseClients, req.body)
+    autonomousModeManager.handleCatDetection(req.body);
 });
 
 /**
@@ -395,64 +404,6 @@ app.get('/api/laser/move-y', async (req, res) => {
 });
 
 /**
- * Moves the laser in random patterns
- * GET /api/laser/autonomous/start
- */
-app.get('/api/laser/autonomous/start', async (req, res) => {
-  let flask_server_url = getFlaskServerUrl();
-  try {
-    
-    console.log(`Starting auto mode...`);
-    const flaskResponse = await axios.get(
-      `${flask_server_url}/autonomous/start`,
-      {
-        params: { direction: direction.toLowerCase() },
-        timeout: 1000
-      }
-    );
-    
-    res.json({
-      status: 'success',
-      data: flaskResponse.data,
-      timestamp: new Date().toISOString()
-    });
-    
-  } catch (error) {
-    console.error('Random movement error:', error.message);
-    handleFlaskError(error, res, 'Failed to move laser in patterns');
-  }
-});
-
-/**
- * Stops the laser movement in random patterns
- * GET /api/laser/autonomous/stop
- */
-app.get('/api/laser/autonomous/stop', async (req, res) => {
-  let flask_server_url = getFlaskServerUrl();
-  try {
-    
-    console.log(`Stopping auto mode...`);
-    const flaskResponse = await axios.get(
-      `${flask_server_url}/autonomous/stop`,
-      {
-        params: { direction: direction.toLowerCase() },
-        timeout: 1000
-      }
-    );
-    
-    res.json({
-      status: 'success',
-      data: flaskResponse.data,
-      timestamp: new Date().toISOString()
-    });
-    
-  } catch (error) {
-    console.error('Stopping random movement error:', error.message);
-    handleFlaskError(error, res, 'Failed to stop moving laser in patterns');
-  }
-});
-
-/**
  * Centers both servos
  */
 app.get('/api/laser/center', async (req, res) => {
@@ -623,4 +574,6 @@ app.use((req, res) => {
 });
 
 // Start the server
-startServer(app, PORT);
+startServer(app, PORT). then(() => {
+   autonomousModeManager.initialize();
+});
