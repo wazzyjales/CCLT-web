@@ -3,9 +3,9 @@ import Stack from '@mui/material/Stack';
 import PetsIcon from '@mui/icons-material/Pets';
 import './Alert.css';
 
-export default function ActionAlerts() {
+export default function ActionAlerts({ show }) {
   return (
-    <div className="alert-overlay">
+    <div className={`alert-overlay ${show ? 'show' : ''}`}>
       <Stack className="alert-stack" spacing={2}>
         <Alert
           severity="success"
@@ -13,7 +13,6 @@ export default function ActionAlerts() {
         >
           A Cat has been detected!
         
-          <PetsIcon/>
         </Alert>
       </Stack>
     </div>

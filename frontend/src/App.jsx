@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./App.css";
-import DirectionButton from "./Components/DirectionButton";
+import Joystick from "./Components/Joystick";
 import Alert from "./Components/Alert";
 import SettingsIcon from "@mui/icons-material/Settings";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import FullScreenDialog from "./Components/SettingsDialog";
 
 function App() {
@@ -16,13 +17,18 @@ function App() {
   const [showAlert, setShowAlert] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
+  const ALERT_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
+  // Tracks the last time the alert was shown so we can enforce the cooldown
+  const lastAlertTimeRef = useRef(0);
+  // Mirrors catDetected in a ref so interval callbacks always read the latest value
+  const catDetectedRef = useRef(false);
+
   useEffect(() => {
     checkBackendHealth();
   }, []);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
-      // Prevent default behavior for arrow keys
       if (
         ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)
       ) {
@@ -48,7 +54,6 @@ function App() {
       }
     };
 
-    // Handle when user clicks off key
     const handleKeyUp = (event) => {
       if (
         ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)
@@ -74,10 +79,8 @@ function App() {
         const data = JSON.parse(event.data);
         console.log('Cat detection event:', data);
 
-        console.log(data.status)
         if (data.status == 'ok') {
           setCatDetected(true);
-          //setShowAlert(true);
         } else {
           setCatDetected(false);
         }
@@ -91,23 +94,40 @@ function App() {
     };
 
     return () => {
-      eventSource.close()
+      eventSource.close();
     };
   }, []);
 
+  // Keep the ref in sync so interval callbacks always see the latest value
   useEffect(() => {
-     if (catDetected) {
-       setShowAlert(true)
-       const timer = setTimeout(() => {
-         setShowAlert(false)
-       }, 1000);
-       return () => clearTimeout(timer);
-     } else {
-       setShowAlert(false)
-       setCatDetected(false)
-     }
-   }, [catDetected])
+    catDetectedRef.current = catDetected;
+  }, [catDetected]);
 
+  useEffect(() => {
+    if (!catDetected) return;
+    const now = Date.now();
+    if (now - lastAlertTimeRef.current < ALERT_COOLDOWN_MS) return;
+
+    lastAlertTimeRef.current = now;
+    setShowAlert(true);
+    const timer = setTimeout(() => setShowAlert(false), 1500);
+    return () => clearTimeout(timer);
+  }, [catDetected]);
+
+  // re-check every cooldown period and alert again if still there
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!catDetectedRef.current) return;
+      const now = Date.now();
+      if (now - lastAlertTimeRef.current < ALERT_COOLDOWN_MS) return;
+
+      lastAlertTimeRef.current = now;
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 1500);
+    }, ALERT_COOLDOWN_MS);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const moveWithDebounce = async (direction, axis) => {
     if (isMoving) return;
@@ -126,7 +146,6 @@ function App() {
       const response = await fetch(endpoint);
       const data = await response.json();
 
-      console.log(data);
       if (data.status === "success") {
         setLaserOn(!laserOn);
       }
@@ -144,9 +163,6 @@ function App() {
       const laser_data = await laser_response.json();
       const camera_data = await camera_response.json();
 
-      console.log(data);
-      console.log(laser_data);
-      console.log(camera_data);
       if (
         data.status === "success" &&
         laser_data.status === "success" &&
@@ -159,10 +175,7 @@ function App() {
         setIsConnected(false);
       }
       setCameraURL(camera_data.video_url);
-
-      console.log(cameraURL);
     } catch (error) {
-      // Backend not reachable
       setBackendStatus("Disconnected");
       setIsConnected(false);
       console.error("Backend health check failed:", error);
@@ -171,75 +184,49 @@ function App() {
 
   return (
     <div className="app-container">
-      {/* Top controls bar */}
-      <div className="top-controls">
-        <button className="button" onClick={() => checkBackendHealth()}>
-          <span>⟳</span>
-          Test Connection
-        </button>
 
-        <div className="status-badge">
-          <div
-            className={`status-dot ${
-              isConnected ? "connected" : "disconnected"
-            }`}
-          ></div>
-          <span className="status-text">{backendStatus}</span>
-        </div>
+      <div className="video-fullscreen">
+        <img
+          src={cameraURL}
+          alt="Live Camera Stream"
+          className={`camera-feed`}
+        />
+      </div>
 
+      <nav className="top-menu">
+        <div className="menu-left">
           <button
-            className={`button button-laser ${
-              laserOn ? "laser-on" : "laser-off"
-            }`}
+            className={`overlay-btn btn-laser ${laserOn ? "laser-on" : "laser-off"}`}
             onClick={toggleLaser}
           >
             Laser: {laserOn ? "ON" : "OFF"}
           </button>
 
-        <button
-          className="button button-right"
-          onClick={() => setSettingsOpen(true)}
-        >
-          <SettingsIcon />
-        </button>
-      </div>
+          <button className="overlay-btn" onClick={checkBackendHealth}>
+            <RefreshIcon fontSize="small" />
+            Test Connection
+          </button>
 
-<div className={`alert-container ${showAlert ? 'show' : ''}`}>
-  <Alert />
-</div>
-
-      {/* Video section with overlayed controls */}
-      <div>
-        <img src={cameraURL} alt="Live Camera Stream" className="camera-feed" />
-        {/* Overlayed direction controls using DirectionButton component */}
-        <div className="overlay-controls">
-          <DirectionButton
-            direction="ArrowUp"
-            onClick={() => moveWithDebounce("up", "y")}
-            isPressed={pressedKey ==="ArrowUp"}
-          />
-
-          <div className="horizontal-overlay">
-            <DirectionButton
-              direction="ArrowLeft"
-              onClick={() => moveWithDebounce("left", "x")}
-              isPressed={pressedKey === "ArrowLeft"}
-            />
-            <DirectionButton
-              direction="ArrowRight"
-              onClick={() => moveWithDebounce("right", "x")}
-              isPressed={pressedKey === "ArrowRight"}
-            />
+          <div className="status-badge">
+            <div className={`status-dot ${isConnected ? "connected" : "disconnected"}`} />
+            <span className="status-text">{backendStatus}</span>
           </div>
-
-          <DirectionButton
-            direction="ArrowDown"
-            onClick={() => moveWithDebounce("down", "y")}
-            isPressed={pressedKey === "ArrowDown"}
-          />
         </div>
-        <img src={"./src/Logo/Logo.png"} alt="Logo" className="logo" />
+
+        <button className="overlay-btn btn-settings" onClick={() => setSettingsOpen(true)}>
+          <SettingsIcon fontSize="small" />
+          Settings
+        </button>
+      </nav>
+
+      <div className="joystick-overlay">
+        <Joystick
+          onMove={(direction, axis) => moveWithDebounce(direction, axis)}
+        />
       </div>
+
+      <Alert show={showAlert} />
+
       <FullScreenDialog
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}

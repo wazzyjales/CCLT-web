@@ -1,0 +1,97 @@
+:root {
+  --joy-accent:        #f279a1;       /* Pink accent — matches existing DirectionButton */
+  --joy-accent-glow:   #ec407a66;     /* Semi-transparent for glows */
+  --joy-accent-bright: #f48cb5;       /* Lighter pink for active states */
+  --joy-base-bg:       #585357;       /* Deep navy base */
+  --joy-base-border:   #585357;       /* Subtle border */
+  --joy-knob-top:      #9b8897;       /* Knob gradient top */
+  --joy-knob-bottom:   #000;       /* Knob gradient bottom */
+  --joy-transition:    0.08s ease-out; /* Snappy feel for active states */
+}
+
+/* The bounding ring the knob moves within */
+.joystick-base {
+  position: relative;
+  border-radius: 30%;
+  background: var(--joy-base-bg);
+
+  /* Multi-layer border: inner dark + pink outer ring */
+  box-shadow:
+    inset 0 0 18px rgba(0, 0, 0, 0.6),
+    inset 0 2px 4px rgba(255, 255, 255, 0.05),
+    0 0 0 2px var(--joy-base-border),
+    0 0 0 4px rgba(236, 64, 122, 0.2),
+    0 4px 24px rgba(0, 0, 0, 0.5);
+
+  cursor: grab;
+  transition: box-shadow var(--joy-transition);
+}
+
+/* Active base — tighten glow and change cursor */
+.joystick-base--active {
+  cursor: grabbing;
+  box-shadow:
+    inset 0 0 18px rgba(0, 0, 0, 0.6),
+    inset 0 2px 4px rgba(255, 255, 255, 0.05),
+    0 0 0 2px var(--joy-accent),
+    0 0 0 5px var(--joy-accent-glow),
+    0 0 30px rgba(236, 64, 122, 0.3),
+    0 4px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* The draggable sphere — positioned at center of base, shifted by JS transform */
+.joystick-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 38% 32%,
+    var(--joy-knob-top) 0%,
+    var(--joy-knob-bottom) 100%
+  );
+
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.7),
+    0 1px 3px  rgba(0, 0, 0, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.08),
+    0 0 0 2px rgba(236, 64, 122, 0.25);
+
+  /* Snap-back transition — only applies when NOT active (pointer is up) */
+  transition:
+    transform     0.25s cubic-bezier(0.34, 1.56, 0.64, 1), /* springy snap */
+    box-shadow    var(--joy-transition);
+
+  pointer-events: none; /* Clicks/drags go to the base, not the knob */
+  will-change: transform;
+}
+
+/* While held — disable the snap-back transition so movement is instant */
+.joystick-knob--active {
+  transition: box-shadow var(--joy-transition);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.8),
+    0 1px 3px  rgba(0, 0, 0, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.1),
+    0 0 0 2px var(--joy-accent),
+    0 0 14px   var(--joy-accent-glow);
+}
+
+/* Small white oval in the upper-left of the knob to give a 3-D sphere effect */
+.joystick-knob-gloss {
+  position: absolute;
+  top:  14%;
+  left: 18%;
+  width:  32%;
+  height: 22%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(255, 255, 255, 0.0) 100%
+  );
+  border-radius: 50%;
+  transform: rotate(-30deg);
+  pointer-events: none;
+}

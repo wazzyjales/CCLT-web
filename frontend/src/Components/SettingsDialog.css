@@ -1,22 +1,33 @@
-/* Settings Dialog Styles */
+/* Settings Dialog — dark glass aesthetic */
 
+/* Dialog paper */
 .settings-dialog {
-  background-image: 
-    radial-gradient(circle, rgba(195, 74, 92, 0.4) 12%, transparent 12%),
-    radial-gradient(circle, rgba(214, 138, 150, 0.3) 12%, transparent 8%) !important;
-  background-size: 40px 40px, 60px 60px !important;
-  background-position: 0 0, 20px 20px !important;
-  background-color: #fff5f8 !important;
+  background: rgba(10, 12, 18, 0.88) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(255, 182, 193, 0.2) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7) !important;
+  color: #fff !important;
 }
 
+/* AppBar */
 .settings-appbar {
-  background: linear-gradient(to bottom, #ffb6c1, #ff92a8) !important;
-  box-shadow: 0 4px 12px rgba(255, 182, 193, 0.3) !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  box-shadow: 0 1px 0 rgba(255, 182, 193, 0.2) !important;
   position: relative !important;
 }
 
 .settings-close-btn {
+  color: rgba(255, 255, 255, 0.7) !important;
+  transition: color 0.2s ease, background 0.2s ease !important;
+}
+
+.settings-close-btn:hover {
   color: #fff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
 }
 
 .settings-title {
@@ -27,52 +38,58 @@
 }
 
 .settings-save-btn {
-  background-color: #fff !important;
-  color: #d63384 !important;
-  padding: 10px 24px !important;
-  font-size: 0.9rem !important;
-  border: none !important;
+  background: rgba(255, 182, 193, 0.14) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  padding: 8px 24px !important;
+  font-size: 0.875rem !important;
+  border: 1px solid rgba(255, 182, 193, 0.38) !important;
   border-radius: 20px !important;
   font-weight: 600 !important;
   cursor: pointer !important;
-  transition: all 0.3s ease !important;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 }
 
-.settings-save-btn:hover {
-  background-color: #fff9fc !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 4px 8px rgba(255, 182, 193, 0.3) !important;
+.settings-save-btn:hover:not(:disabled) {
+  background: rgba(255, 182, 193, 0.28) !important;
+  border-color: rgba(255, 182, 193, 0.65) !important;
+  color: #fff !important;
 }
 
+.settings-save-btn:disabled {
+  opacity: 0.3 !important;
+  cursor: default !important;
+}
+
+/* Main list grid */
 .settings-list {
-  padding: 40px !important;
+  padding: 80px 32px 32px !important;
   display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
-  gap: 30px !important;
-  padding-top: 100px !important;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+  gap: 16px !important;
+  background: transparent !important;
 }
 
+/* Cards */
 .settings-list-item {
-  background: #fff !important;
-  border: 3px solid #ffb6c1 !important;
-  border-radius: 20px !important;
-  padding: 30px !important;
-  transition: all 0.3s ease !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 182, 193, 0.22) !important;
+  border-radius: 14px !important;
+  padding: 24px !important;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease,
+              box-shadow 0.2s ease !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: flex-start !important;
   text-align: left !important;
   cursor: pointer !important;
-  margin-left: 20px !important;
-  margin-right: 20px !important;
-  box-shadow: 0 4px 8px rgba(255, 182, 193, 0.3) !important;
+  box-shadow: none !important;
 }
 
 .settings-list-item:hover {
-  transform: translateY(-4px) !important;
-  box-shadow: 0 8px 16px rgba(255, 182, 193, 0.4) !important;
-  border-color: #ff92a8 !important;
-  background: #fff9fc !important;
+  background: rgba(255, 255, 255, 0.11) !important;
+  border-color: rgba(255, 182, 193, 0.5) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
 }
 
 .settings-divider {
@@ -80,205 +97,162 @@
 }
 
 .settings-item-primary {
-  color: #d63384 !important;
+  color: #fff !important;
   font-weight: 600 !important;
-  font-size: 1.2rem !important;
-  margin-bottom: 8px !important;
+  font-size: 1.05rem !important;
+  margin-bottom: 6px !important;
 }
 
 .settings-item-secondary {
-  color: #ff92a8 !important;
-  font-size: 0.95rem !important;
+  color: rgba(255, 182, 193, 0.75) !important;
+  font-size: 0.9rem !important;
   line-height: 1.5 !important;
 }
 
-/* Detail View Styles */
-
+/* Detail view */
 .settings-detail-view {
-  padding-top: 40px;
+  padding-top: 24px;
   height: 100%;
-  background-image: 
-    radial-gradient(circle, rgba(195, 74, 92, 0.4) 12%, transparent 12%),
-    radial-gradient(circle, rgba(214, 138, 150, 0.3) 12%, transparent 8%);
-  background-size: 40px 40px, 60px 60px;
-  background-position: 0 0, 20px 20px;
-  background-color: #fff5f8;
+  background: transparent;
 }
 
+/* Section panels */
 .settings-section {
-  padding: 30px;
-  background: #fff;
-  margin: 20px;
-  border-radius: 20px;
-  border: 3px solid #ffb6c1;
-  box-shadow: 0 4px 8px rgba(255, 182, 193, 0.3);
+  padding: 22px 24px;
+  background: rgba(255, 255, 255, 0.05);
+  margin: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 182, 193, 0.2);
+  box-shadow: none;
 }
 
 .settings-section-title {
-  font-size: 0.9rem !important;
-  font-weight: 600 !important;
-  color: #d63384 !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  color: rgba(255, 182, 193, 0.75) !important;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 20px !important;
+  letter-spacing: 1.5px;
+  margin-bottom: 16px !important;
 }
 
 /* Form Controls */
-
 .settings-form-control {
   width: 100%;
   margin-top: 12px !important;
 }
 
 .settings-radio-option {
-  margin: 12px 0 !important;
-  padding: 20px;
-  border-radius: 20px;
-  border: 3px solid #ffb6c1;
-  transition: all 0.3s;
-  background: #fff;
+  margin: 8px 0 !important;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 182, 193, 0.2);
+  transition: background 0.2s ease, border-color 0.2s ease;
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .settings-radio-option:hover {
-  background-color: #fff9fc;
-  border-color: #ff92a8;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(255, 182, 193, 0.3);
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 182, 193, 0.45);
+  transform: none;
+  box-shadow: none;
 }
 
 .settings-radio-option .MuiRadio-root.Mui-checked {
-  color: #d63384 !important;
+  color: rgba(255, 182, 193, 0.9) !important;
 }
 
 .settings-radio-option.Mui-checked {
-  border-color: #ff92a8;
-  background-color: rgba(255, 182, 193, 0.1);
+  border-color: rgba(255, 182, 193, 0.45);
+  background: rgba(255, 182, 193, 0.07);
 }
 
 .settings-radio-primary {
-  font-size: 1rem !important;
+  font-size: 0.95rem !important;
   font-weight: 600 !important;
-  color: #d63384 !important;
+  color: #fff !important;
 }
 
 .settings-radio-secondary {
-  font-size: 0.9rem !important;
-  color: #ff92a8 !important;
-  margin-top: 4px !important;
+  font-size: 0.85rem !important;
+  color: rgba(255, 182, 193, 0.65) !important;
+  margin-top: 2px !important;
 }
 
 /* Text Fields */
-
 .settings-text-field {
   margin-bottom: 12px !important;
 }
 
 .settings-text-field .MuiOutlinedInput-root {
-  border-radius: 20px !important;
+  border-radius: 12px !important;
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.06) !important;
 }
 
 .settings-text-field .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
-  border-color: #ffb6c1 !important;
-  border-width: 2px !important;
+  border-color: rgba(255, 182, 193, 0.28) !important;
+  border-width: 1px !important;
 }
 
 .settings-text-field .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
-  border-color: #ff92a8 !important;
+  border-color: rgba(255, 182, 193, 0.55) !important;
 }
 
 .settings-text-field .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
-  border-color: #d63384 !important;
-  border-width: 3px !important;
+  border-color: rgba(255, 182, 193, 0.85) !important;
+  border-width: 1.5px !important;
+}
+
+.settings-text-field .MuiInputLabel-root {
+  color: rgba(255, 182, 193, 0.65) !important;
 }
 
 .settings-text-field .MuiInputLabel-root.Mui-focused {
-  color: #d63384 !important;
+  color: rgba(255, 182, 193, 0.9) !important;
 }
 
 .settings-helper-text {
-  font-size: 0.85rem !important;
-  color: #ff92a8 !important;
-  margin-top: 8px !important;
+  font-size: 0.82rem !important;
+  color: rgba(255, 182, 193, 0.6) !important;
+  margin-top: 6px !important;
   padding: 0 4px;
 }
 
-/* Info Boxes */
-
+/* Info boxes */
 .settings-info-box {
-  margin: 20px 0;
+  margin: 16px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: rgba(255, 182, 193, 0.07);
+  border: 1px solid rgba(255, 182, 193, 0.18);
 }
 
 .settings-info-text {
-  font-size: 0.95rem !important;
-  color: #d63384 !important;
+  font-size: 0.9rem !important;
+  color: rgba(255, 182, 193, 0.8) !important;
   line-height: 1.6 !important;
 }
 
-/* Switch Styles */
-
+/* Switch */
 .MuiSwitch-root .MuiSwitch-switchBase.Mui-checked {
-  color: #d63384 !important;
+  color: rgba(255, 182, 193, 0.9) !important;
 }
 
 .MuiSwitch-root .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track {
-  background-color: #ffb6c1 !important;
+  background-color: rgba(255, 182, 193, 0.4) !important;
 }
 
-/* Responsive Adjustments */
-
-@media (max-width: 1024px) {
-  .settings-list {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
-    gap: 20px !important;
-    padding: 30px 20px !important;
-  }
+/* List items inside detail views */
+.settings-detail-view .settings-list-item {
+  margin: 0 16px;
 }
-
-@media (max-width: 768px) {
-  .settings-list {
-    grid-template-columns: 1fr !important;
-    padding: 20px 15px !important;
-    padding-top: 90px !important;
-  }
-  
-  .settings-section {
-    padding: 20px 16px;
-    margin: 15px;
-  }
-  
-  .settings-list-item {
-    padding: 20px !important;
-  }
-  
-  .settings-radio-option {
-    padding: 16px;
-  }
-}
-
-@media (max-width: 480px) {
-  .settings-list {
-    gap: 15px !important;
-  }
-  
-  .settings-list-item {
-    padding: 16px !important;
-  }
-}
-
-/* Animation for view transitions */
 
 .settings-list,
 .settings-detail-view {
-  animation: fadeInSettings 0.4s ease-in-out;
+  animation: fadeInSettings 0.3s ease-in-out;
 }
 
 @keyframes fadeInSettings {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
