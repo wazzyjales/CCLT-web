@@ -281,6 +281,20 @@ app.get('/api/detection/events', (req, res) => {
   setupSseConnection(req, res, sseClients);
 })
 
+app.get('/api/camera/stream', async (req, res) => {
+  const camera_server_url = getCameraUrl();
+  try {
+    const response = await axios.get(`${camera_server_url}/video_feed`, {
+      responseType: 'stream'
+    });
+    res.setHeader('Content-Type', response.headers['content-type']);
+    response.data.pipe(res);
+  } catch (error) {
+    console.error('Camera stream proxy error:', error.message);
+    handleFlaskError(error, res, 'Failed to proxy camera stream');
+  }
+});
+
 app.get('/api/camera/health', async (req, res) => {
   let camera_server_url = getCameraUrl();
   try {
