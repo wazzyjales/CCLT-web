@@ -17,7 +17,7 @@ function App() {
   const [showAlert, setShowAlert] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const ALERT_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
+  const ALERT_COOLDOWN_MS = 3 * 60 * 1000; // 3 minutes
   // Tracks the last time the alert was shown so we can enforce the cooldown
   const lastAlertTimeRef = useRef(0);
   // Mirrors catDetected in a ref so interval callbacks always read the latest value
@@ -174,7 +174,8 @@ function App() {
         setBackendStatus("Backend error");
         setIsConnected(false);
       }
-      setCameraURL(camera_data.video_url);
+      // setCameraURL(camera_data.video_url); // direct camera URL, not accessible through dev tunnel
+      setCameraURL('/api/camera/stream');
     } catch (error) {
       setBackendStatus("Disconnected");
       setIsConnected(false);
@@ -185,45 +186,42 @@ function App() {
   return (
     <div className="app-container">
 
-      <div className="video-fullscreen">
+      <div className="video-area">
         <img
           src={cameraURL}
           alt="Live Camera Stream"
-          className={`camera-feed`}
+          className="camera-feed"
         />
       </div>
+        <div className="joystick-overlay">
+          <Joystick
+            onMove={(direction, axis) => moveWithDebounce(direction, axis)}
+          />
+        </div>
+      <nav className="side-menu">
+        <button
+          className={`side-btn btn-laser ${laserOn ? "laser-on" : "laser-off"}`}
+          onClick={toggleLaser}
+        >
+          <span>Laser</span>
+          <span>{laserOn ? "ON" : "OFF"}</span>
+        </button>
 
-      <nav className="top-menu">
-        <div className="menu-left">
-          <button
-            className={`overlay-btn btn-laser ${laserOn ? "laser-on" : "laser-off"}`}
-            onClick={toggleLaser}
-          >
-            Laser: {laserOn ? "ON" : "OFF"}
-          </button>
+        <button className="side-btn" onClick={checkBackendHealth}>
+          <RefreshIcon fontSize="small" />
+          <span>Refresh</span>
+        </button>
 
-          <button className="overlay-btn" onClick={checkBackendHealth}>
-            <RefreshIcon fontSize="small" />
-            Test Connection
-          </button>
-
-          <div className="status-badge">
-            <div className={`status-dot ${isConnected ? "connected" : "disconnected"}`} />
-            <span className="status-text">{backendStatus}</span>
-          </div>
+        <div className="status-badge">
+          <div className={`status-dot ${isConnected ? "connected" : "disconnected"}`} />
+          <span className="status-text">{backendStatus}</span>
         </div>
 
-        <button className="overlay-btn btn-settings" onClick={() => setSettingsOpen(true)}>
+        <button className="side-btn" onClick={() => setSettingsOpen(true)}>
           <SettingsIcon fontSize="small" />
-          Settings
+          <span>Settings</span>
         </button>
       </nav>
-
-      <div className="joystick-overlay">
-        <Joystick
-          onMove={(direction, axis) => moveWithDebounce(direction, axis)}
-        />
-      </div>
 
       <Alert show={showAlert} />
 

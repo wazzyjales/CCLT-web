@@ -8,7 +8,11 @@ export default function Joystick({
   knobSize = 80,
 }) {
   const [knobPos, setKnobPos] = useState({ x: 0, y: 0 });
+
   const [active, setActive] = useState(false);
+
+  // Active direction label for UI highlighting: null | 'up' | 'down' | 'left' | 'right'
+  const [activeDir, setActiveDir] = useState(null);
 
   // Ref holding the currently resolved direction object so interval callback
   // always reads the latest value without stale closure issues
@@ -29,7 +33,7 @@ export default function Joystick({
    */
   const resolveDirection = useCallback(
     (x, y) => {
-      const DEAD_ZONE_RATIO = 0.1; // 10% of max radius
+      const DEAD_ZONE_RATIO = 0.1; // 15% of max radius
       const magnitude = Math.sqrt(x * x + y * y);
       if (magnitude < maxRadius * DEAD_ZONE_RATIO) return null;
 
@@ -114,6 +118,7 @@ export default function Joystick({
       if (changed) {
         stopFiring();
         currentDirectionRef.current = newDir;
+        setActiveDir(newDir?.direction ?? null);
         if (newDir) startFiring(newDir);
       }
     },
