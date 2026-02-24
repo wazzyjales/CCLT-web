@@ -1,36 +1,14 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import './Joystick.css';
 
-/**
- * Joystick Component
- *
- * A draggable joystick UI that maps drag direction to laser movement commands.
- * The knob is constrained within a circular boundary. While held in a direction,
- * it fires movement commands at a regular interval (throttled). On release, the
- * knob snaps back to center and movement stops.
- *
- * Props:
- *   onMove(direction, axis) — called repeatedly while joystick is held in a direction
- *                             direction: 'up' | 'down' | 'left' | 'right'
- *                             axis:      'y'  | 'y'    | 'x'    | 'x'
- *   throttleMs             — ms between repeated move commands (default: 300)
- *   size                   — diameter of the bounding circle in px (default: 180)
- *   knobSize               — diameter of the draggable knob in px (default: 70)
- */
 export default function Joystick({
   onMove,
   throttleMs = 100,
   size = 200,
   knobSize = 80,
 }) {
-  // Current knob offset from center (in px)
   const [knobPos, setKnobPos] = useState({ x: 0, y: 0 });
-
-  // Whether the joystick is actively being held
   const [active, setActive] = useState(false);
-
-  // Active direction label for UI highlighting: null | 'up' | 'down' | 'left' | 'right'
-  const [activeDir, setActiveDir] = useState(null);
 
   // Ref holding the currently resolved direction object so interval callback
   // always reads the latest value without stale closure issues
@@ -51,7 +29,7 @@ export default function Joystick({
    */
   const resolveDirection = useCallback(
     (x, y) => {
-      const DEAD_ZONE_RATIO = 0.15; // 15% of max radius
+      const DEAD_ZONE_RATIO = 0.1; // 10% of max radius
       const magnitude = Math.sqrt(x * x + y * y);
       if (magnitude < maxRadius * DEAD_ZONE_RATIO) return null;
 
@@ -136,7 +114,6 @@ export default function Joystick({
       if (changed) {
         stopFiring();
         currentDirectionRef.current = newDir;
-        setActiveDir(newDir?.direction ?? null);
         if (newDir) startFiring(newDir);
       }
     },
@@ -169,14 +146,12 @@ export default function Joystick({
 
   return (
     <div>
-      {/* Outer bounding ring / base */}
       <div
         ref={baseRef}
         className={`joystick-base ${active ? 'joystick-base--active' : ''}`}
         style={{ width: size, height: size }}
         onPointerDown={handlePointerDown}
       >
-        {/* Draggable knob — positioned from its own center via transform */}
         <div
           className={`joystick-knob ${active ? 'joystick-knob--active' : ''}`}
           style={{
@@ -187,7 +162,6 @@ export default function Joystick({
           }}
           aria-hidden="true"
         >
-          {/* Gloss highlight on the knob sphere */}
           <div className="joystick-knob-gloss" />
         </div>
       </div>
