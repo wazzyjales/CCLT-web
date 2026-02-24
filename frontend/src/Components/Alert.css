@@ -1,4 +1,12 @@
-/* ALERT — small toast, bottom-right corner */
+:root {
+  --alert-bg:     rgba(12, 12, 18, 0.82);
+  --alert-border: rgba(255, 182, 193, 0.35);
+  --alert-shadow: rgba(0, 0, 0, 0.55);
+  --alert-ring:   rgba(255, 182, 193, 0.08);
+  --alert-icon:   #4CAF50;
+  --alert-text:   rgba(255, 255, 255, 0.9);
+}
+
 .alert-overlay {
   position: fixed;
   bottom: 28px;
@@ -21,14 +29,14 @@
 }
 
 .alert-message {
-  background: rgba(12, 12, 18, 0.82) !important;
+  background: var(--alert-bg) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(255, 182, 193, 0.35) !important;
+  border: 1px solid var(--alert-border) !important;
   border-radius: 14px !important;
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.55),
-    0 0 0 1px rgba(255, 182, 193, 0.08) !important;
+    0 8px 32px var(--alert-shadow),
+    0 0 0 1px var(--alert-ring) !important;
   font-size: 0.875rem !important;
   font-weight: 600 !important;
   min-width: 0 !important;
@@ -36,13 +44,13 @@
 }
 
 .alert-message .MuiAlert-icon {
-  color: #4CAF50 !important;
+  color: var(--alert-icon) !important;
   font-size: 1.25rem !important;
   opacity: 0.9;
 }
 
 .alert-message .MuiAlert-message {
-  color: rgba(255, 255, 255, 0.9) !important;
+  color: var(--alert-text) !important;
   font-weight: 600 !important;
   white-space: nowrap;
 }

@@ -1,3 +1,40 @@
+:root {
+  /* Base */
+  --app-body-bg:                  #000;
+  --app-text:                     #fff;
+  --app-text-dim:                 rgba(255, 255, 255, 0.75);
+  --app-hover-bg:                 rgba(255, 255, 255, 0.14);
+  --app-active-bg:                rgba(255, 255, 255, 0.24);
+
+  /* Sidebar / pink accent */
+  --app-sidebar-bg:               rgba(0, 0, 0, 0.55);
+  --app-accent-border:            rgba(255, 182, 193, 0.2);
+  --app-accent-border-subtle:     rgba(255, 182, 193, 0.18);
+
+  /* Laser ON (green) */
+  --app-laser-on-text:            #a5d6a7;
+  --app-laser-on-border:          rgba(76, 175, 80, 0.55);
+  --app-laser-on-bg:              rgba(76, 175, 80, 0.18);
+  --app-laser-on-hover-bg:        rgba(76, 175, 80, 0.38);
+  --app-laser-on-hover-border:    rgba(76, 175, 80, 0.9);
+  --app-laser-on-shadow:          rgba(76, 175, 80, 0.2);
+
+  /* Laser OFF (red) */
+  --app-laser-off-text:           #ef9a9a;
+  --app-laser-off-border:         rgba(244, 67, 54, 0.55);
+  --app-laser-off-bg:             rgba(244, 67, 54, 0.18);
+  --app-laser-off-hover-bg:       rgba(244, 67, 54, 0.38);
+  --app-laser-off-hover-border:   rgba(244, 67, 54, 0.9);
+  --app-laser-off-shadow:         rgba(244, 67, 54, 0.2);
+
+  /* Status indicator */
+  --app-status-default:           #999;
+  --app-status-connected:         #4CAF50;
+  --app-status-connected-glow:    rgba(76, 175, 80, 0.8);
+  --app-status-disconnected:      #f44336;
+  --app-status-disconnected-glow: rgba(244, 67, 54, 0.8);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -6,8 +43,8 @@
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #000;
-  color: #fff;
+  background: var(--app-body-bg);
+  color: var(--app-text);
   overflow: hidden;
 }
 
@@ -33,7 +70,7 @@ body {
   position: relative;
   flex: 1;
   height: 100vh;
-  background: #000;
+  background: var(--app-body-bg);
   overflow: hidden;
   margin-left: 120px;
 }
@@ -53,10 +90,10 @@ body {
   width: 120px;
   height: 100vh;
   flex-shrink: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--app-sidebar-bg);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border-left: 1px solid rgba(255, 182, 193, 0.2);
+  border-left: 1px solid var(--app-accent-border);
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -69,10 +106,10 @@ body {
 .side-btn {
   padding: 36px 12px;
   border: none;
-  border-bottom: 1px solid rgba(255, 182, 193, 0.18);
+  border-bottom: 1px solid var(--app-accent-border-subtle);
   border-radius: 0;
   background: transparent;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--app-text-dim);
   font-size: 0.8rem;
   font-weight: 600;
   font-family: inherit;
@@ -88,12 +125,12 @@ body {
 }
 
 .side-btn:hover {
-  background: rgba(255, 255, 255, 0.14);
-  color: #fff;
+  background: var(--app-hover-bg);
+  color: var(--app-text);
 }
 
 .side-btn:active {
-  background: rgba(255, 255, 255, 0.24);
+  background: var(--app-active-bg);
 }
 
 /* =============================================================================
@@ -101,29 +138,29 @@ body {
    ============================================================================= */
 
 .btn-laser.laser-on {
-  border-color: rgba(76, 175, 80, 0.55);
-  background: rgba(76, 175, 80, 0.18);
-  color: #a5d6a7;
+  border-color: var(--app-laser-on-border);
+  background: var(--app-laser-on-bg);
+  color: var(--app-laser-on-text);
 }
 
 .btn-laser.laser-on:hover {
-  background: rgba(76, 175, 80, 0.38);
-  border-color: rgba(76, 175, 80, 0.9);
-  color: #fff;
-  box-shadow: inset 0 0 18px rgba(76, 175, 80, 0.2);
+  background: var(--app-laser-on-hover-bg);
+  border-color: var(--app-laser-on-hover-border);
+  color: var(--app-text);
+  box-shadow: inset 0 0 18px var(--app-laser-on-shadow);
 }
 
 .btn-laser.laser-off {
-  border-color: rgba(244, 67, 54, 0.55);
-  background: rgba(244, 67, 54, 0.18);
-  color: #ef9a9a;
+  border-color: var(--app-laser-off-border);
+  background: var(--app-laser-off-bg);
+  color: var(--app-laser-off-text);
 }
 
 .btn-laser.laser-off:hover {
-  background: rgba(244, 67, 54, 0.38);
-  border-color: rgba(244, 67, 54, 0.9);
-  color: #fff;
-  box-shadow: inset 0 0 18px rgba(244, 67, 54, 0.2);
+  background: var(--app-laser-off-hover-bg);
+  border-color: var(--app-laser-off-hover-border);
+  color: var(--app-text);
+  box-shadow: inset 0 0 18px var(--app-laser-off-shadow);
 }
 
 /* =============================================================================
@@ -132,7 +169,7 @@ body {
 
 .status-badge {
   padding: 26px 12px;
-  border-bottom: 1px solid rgba(255, 182, 193, 0.18);
+  border-bottom: 1px solid var(--app-accent-border-subtle);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -145,7 +182,7 @@ body {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #999;
+  background: var(--app-status-default);
   animation: pulse 2s ease-in-out infinite;
   flex-shrink: 0;
 }
@@ -155,13 +192,13 @@ body {
   50%       { transform: scale(1.2); opacity: 0.75; }
 }
 
-.status-dot.connected    { background: #4CAF50; box-shadow: 0 0 8px rgba(76, 175, 80, 0.8); }
-.status-dot.disconnected { background: #f44336; box-shadow: 0 0 8px rgba(244, 67, 54, 0.8); }
+.status-dot.connected    { background: var(--app-status-connected);    box-shadow: 0 0 8px var(--app-status-connected-glow); }
+.status-dot.disconnected { background: var(--app-status-disconnected); box-shadow: 0 0 8px var(--app-status-disconnected-glow); }
 
 .status-text {
   font-size: 0.68rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--app-text-dim);
   text-align: center;
   word-break: break-word;
 }
@@ -225,14 +262,14 @@ body {
     height: auto;
     flex-direction: row;
     border-left: none;
-    border-top: 1px solid rgba(255, 182, 193, 0.2);
+    border-top: 1px solid var(--app-accent-border);
   }
 
   .side-btn {
     flex: 1;
     padding: 16px 6px;
     border-bottom: none;
-    border-right: 1px solid rgba(255, 182, 193, 0.18);
+    border-right: 1px solid var(--app-accent-border-subtle);
     font-size: 0.7rem;
     gap: 4px;
     touch-action: manipulation;
@@ -247,7 +284,7 @@ body {
     flex-direction: column;
     padding: 16px 6px;
     border-bottom: none;
-    border-right: 1px solid rgba(255, 182, 193, 0.18);
+    border-right: 1px solid var(--app-accent-border-subtle);
     gap: 4px;
   }
 

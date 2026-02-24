@@ -1,48 +1,90 @@
+:root {
+  /* Dialog surfaces */
+  --sd-dialog-bg:              rgba(10, 12, 18, 0.88);
+  --sd-appbar-bg:              rgba(0, 0, 0, 0.5);
+  --sd-section-bg:             rgba(255, 255, 255, 0.05);
+  --sd-surface:                rgba(255, 255, 255, 0.06);
+
+  /* Text */
+  --sd-text:                   #fff;
+  --sd-text-bright:            rgba(255, 255, 255, 0.85);
+  --sd-text-dim:               rgba(255, 255, 255, 0.7);
+
+  /* Interactive surfaces */
+  --sd-hover-bg:               rgba(255, 255, 255, 0.1);
+  --sd-card-hover-bg:          rgba(255, 255, 255, 0.11);
+  --sd-radio-bg:               rgba(255, 255, 255, 0.04);
+  --sd-radio-hover-bg:         rgba(255, 255, 255, 0.09);
+
+  /* Shadows */
+  --sd-deep-shadow:            rgba(0, 0, 0, 0.7);
+  --sd-shadow:                 rgba(0, 0, 0, 0.3);
+
+  /* Pink accent — ordered light to strong */
+  --sd-accent-subtle-bg:       rgba(255, 182, 193, 0.07);
+  --sd-accent-btn-bg:          rgba(255, 182, 193, 0.14);
+  --sd-accent-info-border:     rgba(255, 182, 193, 0.18);
+  --sd-accent-border:          rgba(255, 182, 193, 0.2);
+  --sd-accent-card-border:     rgba(255, 182, 193, 0.22);
+  --sd-accent-mid:             rgba(255, 182, 193, 0.28);
+  --sd-accent-btn-border:      rgba(255, 182, 193, 0.38);
+  --sd-accent-switch-track:    rgba(255, 182, 193, 0.4);
+  --sd-accent-hover-border:    rgba(255, 182, 193, 0.45);
+  --sd-accent-card-hover-border: rgba(255, 182, 193, 0.5);
+  --sd-accent-field-hover:     rgba(255, 182, 193, 0.55);
+  --sd-accent-helper:          rgba(255, 182, 193, 0.6);
+  --sd-accent-secondary:       rgba(255, 182, 193, 0.65);
+  --sd-accent-text:            rgba(255, 182, 193, 0.75);
+  --sd-accent-info-text:       rgba(255, 182, 193, 0.8);
+  --sd-accent-field-focused:   rgba(255, 182, 193, 0.85);
+  --sd-accent-strong:          rgba(255, 182, 193, 0.9);
+}
+
 /* Settings Dialog — dark glass aesthetic */
 
 /* Dialog paper */
 .settings-dialog {
-  background: rgba(10, 12, 18, 0.88) !important;
+  background: var(--sd-dialog-bg) !important;
   backdrop-filter: blur(24px) !important;
   -webkit-backdrop-filter: blur(24px) !important;
-  border: 1px solid rgba(255, 182, 193, 0.2) !important;
+  border: 1px solid var(--sd-accent-border) !important;
   border-radius: 16px !important;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7) !important;
-  color: #fff !important;
+  box-shadow: 0 24px 64px var(--sd-deep-shadow) !important;
+  color: var(--sd-text) !important;
 }
 
 /* AppBar */
 .settings-appbar {
-  background: rgba(0, 0, 0, 0.5) !important;
+  background: var(--sd-appbar-bg) !important;
   backdrop-filter: blur(14px) !important;
   -webkit-backdrop-filter: blur(14px) !important;
-  box-shadow: 0 1px 0 rgba(255, 182, 193, 0.2) !important;
+  box-shadow: 0 1px 0 var(--sd-accent-border) !important;
   position: relative !important;
 }
 
 .settings-close-btn {
-  color: rgba(255, 255, 255, 0.7) !important;
+  color: var(--sd-text-dim) !important;
   transition: color 0.2s ease, background 0.2s ease !important;
 }
 
 .settings-close-btn:hover {
-  color: #fff !important;
-  background: rgba(255, 255, 255, 0.1) !important;
+  color: var(--sd-text) !important;
+  background: var(--sd-hover-bg) !important;
 }
 
 .settings-title {
   flex: 1 !important;
-  color: #fff !important;
+  color: var(--sd-text) !important;
   margin-left: 16px !important;
   font-weight: 600 !important;
 }
 
 .settings-save-btn {
-  background: rgba(255, 182, 193, 0.14) !important;
-  color: rgba(255, 255, 255, 0.85) !important;
+  background: var(--sd-accent-btn-bg) !important;
+  color: var(--sd-text-bright) !important;
   padding: 8px 24px !important;
   font-size: 0.875rem !important;
-  border: 1px solid rgba(255, 182, 193, 0.38) !important;
+  border: 1px solid var(--sd-accent-btn-border) !important;
   border-radius: 20px !important;
   font-weight: 600 !important;
   cursor: pointer !important;
@@ -50,9 +92,9 @@
 }
 
 .settings-save-btn:hover:not(:disabled) {
-  background: rgba(255, 182, 193, 0.28) !important;
-  border-color: rgba(255, 182, 193, 0.65) !important;
-  color: #fff !important;
+  background: var(--sd-accent-mid) !important;
+  border-color: var(--sd-accent-secondary) !important;
+  color: var(--sd-text) !important;
 }
 
 .settings-save-btn:disabled {
@@ -71,8 +113,8 @@
 
 /* Cards */
 .settings-list-item {
-  background: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 182, 193, 0.22) !important;
+  background: var(--sd-surface) !important;
+  border: 1px solid var(--sd-accent-card-border) !important;
   border-radius: 14px !important;
   padding: 24px !important;
   transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease,
@@ -86,10 +128,10 @@
 }
 
 .settings-list-item:hover {
-  background: rgba(255, 255, 255, 0.11) !important;
-  border-color: rgba(255, 182, 193, 0.5) !important;
+  background: var(--sd-card-hover-bg) !important;
+  border-color: var(--sd-accent-card-hover-border) !important;
   transform: translateY(-2px) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 8px 24px var(--sd-shadow) !important;
 }
 
 .settings-divider {
@@ -97,14 +139,14 @@
 }
 
 .settings-item-primary {
-  color: #fff !important;
+  color: var(--sd-text) !important;
   font-weight: 600 !important;
   font-size: 1.05rem !important;
   margin-bottom: 6px !important;
 }
 
 .settings-item-secondary {
-  color: rgba(255, 182, 193, 0.75) !important;
+  color: var(--sd-accent-text) !important;
   font-size: 0.9rem !important;
   line-height: 1.5 !important;
 }
@@ -119,17 +161,17 @@
 /* Section panels */
 .settings-section {
   padding: 22px 24px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--sd-section-bg);
   margin: 16px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 182, 193, 0.2);
+  border: 1px solid var(--sd-accent-border);
   box-shadow: none;
 }
 
 .settings-section-title {
   font-size: 0.78rem !important;
   font-weight: 700 !important;
-  color: rgba(255, 182, 193, 0.75) !important;
+  color: var(--sd-accent-text) !important;
   text-transform: uppercase;
   letter-spacing: 1.5px;
   margin-bottom: 16px !important;
@@ -145,36 +187,36 @@
   margin: 8px 0 !important;
   padding: 14px 18px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 182, 193, 0.2);
+  border: 1px solid var(--sd-accent-border);
   transition: background 0.2s ease, border-color 0.2s ease;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--sd-radio-bg);
 }
 
 .settings-radio-option:hover {
-  background: rgba(255, 255, 255, 0.09);
-  border-color: rgba(255, 182, 193, 0.45);
+  background: var(--sd-radio-hover-bg);
+  border-color: var(--sd-accent-hover-border);
   transform: none;
   box-shadow: none;
 }
 
 .settings-radio-option .MuiRadio-root.Mui-checked {
-  color: rgba(255, 182, 193, 0.9) !important;
+  color: var(--sd-accent-strong) !important;
 }
 
 .settings-radio-option.Mui-checked {
-  border-color: rgba(255, 182, 193, 0.45);
-  background: rgba(255, 182, 193, 0.07);
+  border-color: var(--sd-accent-hover-border);
+  background: var(--sd-accent-subtle-bg);
 }
 
 .settings-radio-primary {
   font-size: 0.95rem !important;
   font-weight: 600 !important;
-  color: #fff !important;
+  color: var(--sd-text) !important;
 }
 
 .settings-radio-secondary {
   font-size: 0.85rem !important;
-  color: rgba(255, 182, 193, 0.65) !important;
+  color: var(--sd-accent-secondary) !important;
   margin-top: 2px !important;
 }
 
@@ -185,35 +227,35 @@
 
 .settings-text-field .MuiOutlinedInput-root {
   border-radius: 12px !important;
-  color: #fff !important;
-  background: rgba(255, 255, 255, 0.06) !important;
+  color: var(--sd-text) !important;
+  background: var(--sd-surface) !important;
 }
 
 .settings-text-field .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
-  border-color: rgba(255, 182, 193, 0.28) !important;
+  border-color: var(--sd-accent-mid) !important;
   border-width: 1px !important;
 }
 
 .settings-text-field .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
-  border-color: rgba(255, 182, 193, 0.55) !important;
+  border-color: var(--sd-accent-field-hover) !important;
 }
 
 .settings-text-field .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
-  border-color: rgba(255, 182, 193, 0.85) !important;
+  border-color: var(--sd-accent-field-focused) !important;
   border-width: 1.5px !important;
 }
 
 .settings-text-field .MuiInputLabel-root {
-  color: rgba(255, 182, 193, 0.65) !important;
+  color: var(--sd-accent-secondary) !important;
 }
 
 .settings-text-field .MuiInputLabel-root.Mui-focused {
-  color: rgba(255, 182, 193, 0.9) !important;
+  color: var(--sd-accent-strong) !important;
 }
 
 .settings-helper-text {
   font-size: 0.82rem !important;
-  color: rgba(255, 182, 193, 0.6) !important;
+  color: var(--sd-accent-helper) !important;
   margin-top: 6px !important;
   padding: 0 4px;
 }
@@ -223,23 +265,23 @@
   margin: 16px;
   padding: 14px 18px;
   border-radius: 12px;
-  background: rgba(255, 182, 193, 0.07);
-  border: 1px solid rgba(255, 182, 193, 0.18);
+  background: var(--sd-accent-subtle-bg);
+  border: 1px solid var(--sd-accent-info-border);
 }
 
 .settings-info-text {
   font-size: 0.9rem !important;
-  color: rgba(255, 182, 193, 0.8) !important;
+  color: var(--sd-accent-info-text) !important;
   line-height: 1.6 !important;
 }
 
 /* Switch */
 .MuiSwitch-root .MuiSwitch-switchBase.Mui-checked {
-  color: rgba(255, 182, 193, 0.9) !important;
+  color: var(--sd-accent-strong) !important;
 }
 
 .MuiSwitch-root .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track {
-  background-color: rgba(255, 182, 193, 0.4) !important;
+  background-color: var(--sd-accent-switch-track) !important;
 }
 
 /* List items inside detail views */
