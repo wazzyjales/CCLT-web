@@ -1,5 +1,7 @@
 const axios = require('axios');
 
+const ALERT_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
+let lastAlertTime = 0;
 /*****************************************************************
  * FLASK SERVER CONFIGURATION
  *****************************************************************/
@@ -159,6 +161,28 @@ function setupSseConnection(req, res, sseClients) {
   });
 }
 
+/**
+ * Send a cat detection notification to a Discord channel via webhook
+ */
+async function sendDiscordNotification(body) {
+  const webhookUrl = process.env.DISCORD_WEBHOOK;
+  if (!webhookUrl) return;
+
+  const now = Date.now();
+  if (now - lastAlertTime < ALERT_COOLDOWN_MS) return;
+
+  lastAlertTime = now;
+  const timestamp = new Date().toLocaleTimeString();
+  try {
+    await axios.post(webhookUrl, {
+      content: ` **Cat detected!**\nTime: ${timestamp}\n Go say hi to the kids! :3 `
+    });
+    console.log('Discord notification sent');
+  } catch (error) {
+    console.error('Failed to send Discord notification:', error.message);
+  }
+}
+
 /*****************************************************************
  * SERVER STARTUP
  *****************************************************************/
@@ -205,6 +229,9 @@ module.exports = {
   // SSE helpers
   sendCatDetected,
   setupSseConnection,
+
+  // Notifications
+  sendDiscordNotification,
   
   // Server startup
   startServer

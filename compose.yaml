@@ -20,6 +20,7 @@ services:
       - REMOTE_FLASK_SERVER_URL=http://100.81.246.79:8080
       - REMOTE_CAMERA_URL=http://100.81.246.79:5000
       - FRONTEND_URL=http://localhost
+      - DISCORD_WEBHOOK=https://discord.com/api/webhooks/1476367608386162769/d-i4QHkJq9FuJuwBnvsO6UfVgNy6GFbZcHkBc64cS0ofyNbWIbY9tnUppHzodWhNxTbk
     
     ports:
       - "2000:2000"

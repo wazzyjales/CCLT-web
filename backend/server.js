@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
@@ -11,7 +12,8 @@ const {
   handleFlaskError,
   sendCatDetected,
   setupSseConnection,
-  startServer
+  startServer,
+  sendDiscordNotification
 } = require('./server-helpers');
 
 // Import database functions
@@ -222,8 +224,13 @@ app.patch('/api/settings/autonomous', (req, res) => {
 app.post('/api/detection', (req, res) => {
     console.log('Received data:', req.body);
     res.json({ status: 'success', received: req.body });
-    sendCatDetected(sseClients, req.body)
+    sendCatDetected(sseClients, req.body);
     autonomousModeManager.handleCatDetection(req.body);
+
+    const settings = getSettings('jasmi');
+    if (settings?.notificationsEnabled) {
+      sendDiscordNotification(req.body);
+    }
 });
 
 /**
