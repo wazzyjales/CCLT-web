@@ -184,6 +184,8 @@ function App() {
   };
 
   return (
+    <>
+    <div className="portrait-overlay">(rotate sideways)</div>
     <div className="app-container">
 
       <div className="video-area">
@@ -230,6 +232,7 @@ function App() {
         onClose={() => setSettingsOpen(false)}
       />
     </div>
+    </>
   );
 }
 

@@ -239,69 +239,26 @@ body {
 }
 
 /* =============================================================================
-   Mobile portrait
+   Portrait lock overlay
    ============================================================================= */
 
-@media (max-width: 500px) {
-  .app-container {
-    flex-direction: column;
-  }
+.portrait-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #000;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-align: center;
+}
 
-  .side-spacer {
-    display: none;
-  }
-
-  .video-area {
-    margin-left: 0;
-    width: 100%;
-    height: auto;
-  }
-
-  .side-menu {
-    width: 100%;
-    height: auto;
-    flex-direction: row;
-    border-left: none;
-    border-top: 1px solid var(--app-accent-border);
-  }
-
-  .side-btn {
-    flex: 1;
-    padding: 16px 6px;
-    border-bottom: none;
-    border-right: 1px solid var(--app-accent-border-subtle);
-    font-size: 0.7rem;
-    gap: 4px;
-    touch-action: manipulation;
-  }
-
-  .side-menu > :last-child {
-    border-right: none;
-  }
-
-  .status-badge {
-    flex: 1;
-    flex-direction: column;
-    padding: 16px 6px;
-    border-bottom: none;
-    border-right: 1px solid var(--app-accent-border-subtle);
-    gap: 4px;
-  }
-
-  .status-text {
-    font-size: 0.6rem;
-  }
-
-  .joystick-overlay {
-    bottom: 16px;
-    left: 16px;
-    transform: scale(0.6);
-    transform-origin: bottom left;
-  }
-
-  .alert-container {
-    bottom: 90px;
-    right: 16px;
+@media (orientation: portrait) and (max-width: 900px) {
+  .portrait-overlay {
+    display: flex;
   }
 }
 
@@ -332,7 +289,7 @@ body {
   }
 
   .joystick-overlay {
-    bottom: 12px;
+    bottom: 22px;
     left: 10px;
     transform: scale(0.6);
     transform-origin: bottom left;
